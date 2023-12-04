@@ -35,11 +35,20 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar-server') {
                     sh "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=Register-app -Dsonar.java.binaries=. -Dsonar.projectKey=Register-app"
-                }
-                script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
+                   }
+                
                 }
             }
         }
+        stage('Quality Gate') {
+            steps {
+               script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
+                   }
+                
+                }
+            }
+         }
+        
     }
 }
