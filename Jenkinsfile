@@ -58,7 +58,8 @@ pipeline {
     }
     post {
         always {
-            // Clean up and finalize steps here
+            // Add a cleanup step, a notification, or other final actions here
+            echo 'Pipeline execution complete.'
         }
     }
 }
