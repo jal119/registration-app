@@ -19,7 +19,7 @@ pipeline {
 
         stage('Checkout from SCM') {
             steps {
-                git branch: 'main', credentialsId: 'github', url: 'https://github.com/jal119/registration-app.git'
+                git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/jal119/registration-app.git'
             }
         }
 
@@ -40,13 +40,8 @@ pipeline {
                 withSonarQubeEnv('sonar-server') {
                     sh "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=Register-app -Dsonar.java.binaries=target -Dsonar.projectKey=Register-app"
                 }
-            }
-        }
-
-        stage('Quality Gate') {
-            steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
                 }
             }
         }
