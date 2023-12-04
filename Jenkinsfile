@@ -1,5 +1,7 @@
 pipeline {
-    agent { label 'Jenkins-Agent' }
+    agent {
+        label 'Jenkins-Agent'
+    }
 
     tools {
         jdk 'Java17'
@@ -19,7 +21,7 @@ pipeline {
 
         stage('Checkout from SCM') {
             steps {
-                git branch: 'main', credentialsId: 'github', url: 'https://github.com/jal119/registration-app.git'
+                git branch: 'main', url: 'https://github.com/jal119/registration-app.git', credentialsId: 'github'
             }
         }
 
@@ -38,10 +40,8 @@ pipeline {
         stage('Code Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
-                    sh "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=Register-app -Dsonar.java.binaries=target -Dsonar.projectKey=Register-app"
+                    sh script: "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=Register-app -Dsonar.java.binaries=target -Dsonar.projectKey=Register-app"
                 }
-                script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
             }
         }
 
