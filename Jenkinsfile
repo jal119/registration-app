@@ -28,6 +28,8 @@ pipeline {
         stage('Build Application') {
             steps {
                 sh 'mvn clean package'
+                // List directory contents for diagnostic purposes
+                sh 'ls -alh'
             }
         }
 
@@ -40,7 +42,8 @@ pipeline {
         stage('Code Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
-                    sh script: "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=Register-app -Dsonar.java.binaries=target -Dsonar.projectKey=Register-app"
+                    // Ensure that the path to 'target' is correct
+                    sh script: "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=Register-app -Dsonar.java.binaries=target/classes -Dsonar.projectKey=Register-app"
                 }
             }
         }
@@ -51,6 +54,11 @@ pipeline {
                     waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
                 }
             }
+        }
+    }
+    post {
+        always {
+            // Clean up and finalize steps here
         }
     }
 }
