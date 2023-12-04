@@ -13,53 +13,47 @@ pipeline {
     }
 
     stages {
-        stage('Clean Workspace') {
+        stage('Prepare') {
             steps {
-                cleanWs()
+                cleanWs() // Clean the workspace before starting
             }
         }
 
-        stage('Checkout from SCM') {
+        stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/jal119/registration-app.git', credentialsId: 'github'
+                // Checkout the main branch from the specified GitHub repository
+                git branch: 'main', 
+                    url: 'https://github.com/jal119/registration-app.git', 
+                    credentialsId: 'github'
             }
         }
 
-        stage('Build Application') {
+        stage('Build') {
             steps {
+                // Run Maven clean and package commands
                 sh 'mvn clean package'
-                // List directory contents for diagnostic purposes
-                sh 'ls -alh'
             }
         }
 
-        stage('Test Application') {
+        stage('Test') {
             steps {
+                // Execute tests using Maven
                 sh 'mvn test'
             }
         }
 
-        stage('Code Analysis') {
+        stage('Code Quality Analysis') {
             steps {
+                // Run SonarQube scanner
                 withSonarQubeEnv('sonar-server') {
-                    // Ensure that the path to 'target' is correct
-                    sh script: "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=Register-app -Dsonar.java.binaries=target/classes -Dsonar.projectKey=Register-app"
+                    sh "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=webapp -Dsonar.java.binaries=. -Dsonar.projectKey=webapp"
                 }
-            }
-        }
 
-        stage('Quality Gate') {
-            steps {
+                // Check the quality gate status
                 script {
                     waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
                 }
             }
-        }
-    }
-    post {
-        always {
-            // Add a cleanup step, a notification, or other final actions here
-            echo 'Pipeline execution complete.'
         }
     }
 }
