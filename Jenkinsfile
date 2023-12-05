@@ -10,12 +10,12 @@ pipeline {
 
     environment {
         SONAR_SCANNER_HOME = tool 'sonar-scanner'
-        APP_NAME = "register-app-pipeline"
-        RELEASE = "1.0.0"
-        DOCKER_USER = "jall1985"
-        DOCKER_PASS = 'docker'
-        IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
-        IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
+        //APP_NAME = "register-app-pipeline"
+        //RELEASE = "1.0.0"
+        //DOCKER_USER = "jall1985"
+        //DOCKER_PASS = 'docker'
+        //IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
+        //IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
 	    //JENKINS_API_TOKEN = credentials("JENKINS_API_TOKEN")
     }
 
@@ -60,20 +60,17 @@ pipeline {
             }
         }
         
-        stage("Build & Push Docker Image") {
+         stage("Docker Build & Push") {
             steps {
                 script {
-                    docker.withRegistry('',DOCKER_PASS) {
-                        docker_image = docker.build "${IMAGE_NAME}"
-                    }
-
-                    docker.withRegistry('',DOCKER_PASS) {
-                        docker_image.push("${IMAGE_TAG}")
-                        docker_image.push('latest')
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {   
+                        sh "docker build -t register-app-pipeline ."
+                        sh "docker tag register-app-pipeline jall1985/register-app-pipeline:latest"
+                        sh "docker push jall1985/register-app-pipeline:latest"
                     }
                 }
             }
         }
+
     }
 }
-
