@@ -13,13 +13,13 @@ pipeline {
     }
 
     stages {
-        stage('Prepare') {
+        stage('Cleanup Workspace') {
             steps {
                 cleanWs() // Clean the workspace before starting
             }
         }
 
-        stage('Checkout Code') {
+        stage('Checkout from SCM') {
             steps {
                 // Checkout the main branch from the specified GitHub repository
                 git branch: 'main', 
@@ -28,28 +28,25 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Application') {
             steps {
                 // Run Maven clean and package commands
                 sh 'mvn clean package'
             }
         }
 
-        stage('Test') {
+        stage('Test Application') {
             steps {
                 // Execute tests using Maven
                 sh 'mvn test'
             }
         }
 
-        stage('Code Quality Analysis') {
+        stage('SonarQube Analysis') {
             steps {
-                // Run SonarQube scanner
                 withSonarQubeEnv('sonar-server') {
-                    sh "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=webapp -Dsonar.java.binaries=. -Dsonar.projectKey=webapp"
+                    sh "${env.SONAR_SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=Register-app -Dsonar.java.binaries=. -Dsonar.projectKey=Register-app"
                 }
-
-                // Check the quality gate status
                 script {
                     waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
                 }
